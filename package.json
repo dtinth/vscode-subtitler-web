@@ -1,7 +1,7 @@
 {
-  "name": "fresh-extension",
-  "displayName": "fresh-extension",
-  "description": "",
+  "name": "subtitler2",
+  "displayName": "subtitler2",
+  "description": "Tool to create subtitles",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.73.0"
@@ -10,16 +10,41 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:fresh-extension.helloWorld"
+    "onView:subtitler.view"
   ],
   "browser": "./dist/web/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "fresh-extension.helloWorld",
-        "title": "Hello World"
+        "command": "subtitler.insertTime",
+        "title": "subtitler: Insert current time"
+      },
+      {
+        "command": "subtitler.jumpToText",
+        "title": "subtitler: Jump to current text"
+      },
+      {
+        "command": "subtitler.seekForward",
+        "title": "subtitler: Seek forward"
+      },
+      {
+        "command": "subtitler.seekBackward",
+        "title": "subtitler: Seek backward"
+      },
+      {
+        "command": "subtitler.playPause",
+        "title": "subtitler: Play/Pause"
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "subtitler.view",
+          "name": "subtitler"
+        }
+      ]
+    }
   },
   "scripts": {
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
@@ -32,19 +57,22 @@
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
   },
   "devDependencies": {
-    "@types/vscode": "^1.73.0",
     "@types/mocha": "^10.0.0",
-    "eslint": "^8.26.0",
+    "@types/vscode": "^1.73.0",
+    "@types/webpack-env": "^1.18.0",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^5.42.0",
-    "mocha": "^10.1.0",
-    "typescript": "^4.8.4",
     "@vscode/test-web": "^0.0.32",
-    "ts-loader": "^9.4.1",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "@types/webpack-env": "^1.18.0",
     "assert": "^2.0.0",
-    "process": "^0.11.10"
+    "eslint": "^8.26.0",
+    "mocha": "^10.1.0",
+    "process": "^0.11.10",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "@types/vscode-webview": "^1.57.0"
   }
 }

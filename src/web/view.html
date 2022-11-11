@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>subtitler</title>
+  </head>
+  <body>
+    <video
+      id="video"
+      controls
+      style="max-width: 100%; box-sizing: border-box"
+    ></video>
+    <input type="file" id="file" />
+
+    <script>
+      // @ts-check
+
+      // @ts-ignore
+      const vscode = acquireVsCodeApi()
+      const fileInput = /** @type {HTMLInputElement} */ (
+        document.getElementById('file')
+      )
+
+      /** @type {{ times: number[]; id: any } | undefined} */
+      let segments
+
+      const video = /** @type {HTMLVideoElement} */ (
+        document.getElementById('video')
+      )
+      fileInput.addEventListener('change', async (e) => {
+        video.src = URL.createObjectURL(fileInput.files[0])
+      })
+      window.addEventListener('message', (event) => {
+        const message = event.data
+        console.log('Received message:', message.type)
+        switch (message.type) {
+          case 'getTime': {
+            vscode.postMessage({
+              type: 'time',
+              time: video.currentTime,
+              id: message.id,
+            })
+            break
+          }
+          case 'jump': {
+            jumpOrSeek((t) => message.time)
+            break
+          }
+          case 'seek': {
+            jumpOrSeek((t) => t + message.delta)
+            break
+          }
+          case 'playPause': {
+            playPause()
+            break
+          }
+          case 'registerSegments': {
+            segments = {
+              times: message.times,
+              id: message.id,
+            }
+            updateActiveSegment()
+            break
+          }
+        }
+      })
+
+      function playPause() {
+        if (video.paused) {
+          video.play()
+        } else {
+          video.pause()
+        }
+      }
+
+      function jumpOrSeek(f) {
+        video.currentTime = f(video.currentTime)
+      }
+
+      let lastNotifiedSegmentKey = ''
+      function updateActiveSegment() {
+        if (!segments) return
+        const time = video.currentTime
+        let began
+        for (const [i, t] of segments.times.entries()) {
+          if (time >= t) {
+            began = { index: i }
+          } else {
+            break
+          }
+        }
+        if (began) {
+          const segmentKey = segments.id + '/' + began.index
+          if (lastNotifiedSegmentKey !== segmentKey) {
+            lastNotifiedSegmentKey = segmentKey
+            vscode.postMessage({
+              type: 'setActiveSegmentIndex',
+              index: began.index,
+              id: segments.id,
+            })
+          }
+        }
+      }
+      video.ontimeupdate = () => {
+        updateActiveSegment()
+      }
+    </script>
+  </body>
+</html>
