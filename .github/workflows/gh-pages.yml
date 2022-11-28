@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build extension
-        run: npm run compile
+        run: npm run compile-web
       - name: Package web extension
         run: |
           rm -rf out
