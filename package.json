@@ -45,7 +45,29 @@
           "name": "subtitler"
         }
       ]
-    }
+    },
+    "keybindings": [
+      {
+        "key": "ctrl+alt+cmd+enter",
+        "command": "subtitler.insertTime"
+      },
+      {
+        "key": "ctrl+alt+cmd+j",
+        "command": "subtitler.jumpToText"
+      },
+      {
+        "key": "ctrl+alt+cmd+space",
+        "command": "subtitler.playPause"
+      },
+      {
+        "key": "ctrl+alt+cmd+left",
+        "command": "subtitler.seekBackward"
+      },
+      {
+        "key": "ctrl+alt+cmd+right",
+        "command": "subtitler.seekForward"
+      }
+    ]
   },
   "scripts": {
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",

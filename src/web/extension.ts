@@ -64,7 +64,7 @@ class SubtitlerViewProvider implements vscode.WebviewViewProvider {
   private _uri: vscode.Uri | undefined
   private _registrationId = 0
   private _nextRegistrationId = 1
-  private _activeTimeRequest?: { id: string, resolve: (time: number) => void }
+  private _activeTimeRequest?: { id: string; resolve: (time: number) => void }
 
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -191,20 +191,56 @@ export function refresh(
           if (segment.endTime) {
             const time = segment.endTime - segment.startTime
             const cps = Math.floor(segment.characterCount / time)
+            const hasText =
+              segment.lines.join('').trim().replace(/^-$/, '').length > 0
+            const duration = segment.endTime - segment.startTime
             decoration.renderOptions = {
               after: {
-                contentText: ` — ${cps} CPS`,
+                contentText: ` — ${cps} CPS, ${
+                  segment.endTime ? duration.toFixed(2) + 's' : ''
+                }`,
                 color: '#8b8685',
               },
             }
-            if (segment.endTime < segment.startTime) {
+            if (duration < 0) {
               diagnostics.push({
                 severity: vscode.DiagnosticSeverity.Error,
                 range: lineOfText.range,
                 message: 'Timestamp is out-of-order',
               })
+            } else if (duration < 0.5 && !hasText) {
+              //https://partnerhelp.netflixstudios.com/hc/en-us/articles/360051554394-Timed-Text-Style-Guide-Subtitle-Timing-Guidelines#:~:text=Gaps%20between%20subtitles%20should%20either%20be%202%20frames%20or%20half%20a%20second%20or%20more
+              diagnostics.push({
+                severity: vscode.DiagnosticSeverity.Warning,
+                range: lineOfText.range,
+                message: 'Gap is too short, remove the gap',
+              })
+            } else if (duration < 5 / 6 && hasText) {
+              // https://partnerhelp.netflixstudios.com/hc/en-us/articles/215758617-Timed-Text-Style-Guide-General-Requirements#:~:text=1.%20Duration-,Minimum%20duration,-%3A%C2%A05/6%20(five
+              diagnostics.push({
+                severity: vscode.DiagnosticSeverity.Warning,
+                range: lineOfText.range,
+                message:
+                  'Subtitle duration is too short, must be at least 0.84 seconds',
+              })
+            } else if (duration > 7 && hasText) {
+              // https://partnerhelp.netflixstudios.com/hc/en-us/articles/215758617-Timed-Text-Style-Guide-General-Requirements#:~:text=frames%20for%2024fps)-,Maximum%20duration,-%3A%207%20seconds%20per
+              diagnostics.push({
+                severity: vscode.DiagnosticSeverity.Warning,
+                range: lineOfText.range,
+                message:
+                  'Subtitle duration is too long, must be at most 7 seconds',
+              })
+            } else if (!segment.endTime && hasText) {
+              diagnostics.push({
+                severity: vscode.DiagnosticSeverity.Error,
+                range: lineOfText.range,
+                message: 'Subtitle is missing an end time',
+              })
             }
+
             if (cps > 20) {
+              // https://partnerhelp.netflixstudios.com/hc/en-us/articles/217350977-English-Timed-Text-Style-Guide#:~:text=17.%20Reading%20Speed-,Adult%20programs%3A%2020%20characters%20per%20second,-Children%E2%80%99s%C2%A0programs%3A%2017
               diagnostics.push({
                 severity: vscode.DiagnosticSeverity.Warning,
                 range: lineOfText.range,
