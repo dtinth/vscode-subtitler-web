@@ -1,6 +1,7 @@
 {
   "name": "subtitler2",
   "displayName": "subtitler2",
+  "publisher": "dtinth",
   "description": "Tool to create subtitles",
   "version": "0.0.1",
   "engines": {
