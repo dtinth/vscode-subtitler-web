@@ -1,6 +1,8 @@
-# fresh-extension README
+# vscode-subtitler-web
 
-This is the README for your extension "fresh-extension". After writing up a brief description, we recommend including the following sections.
+## Installation
+
+In `vscode.dev`, run the command “Developer: Install Extension from Location” and enter `https://dtinth.github.io/vscode-subtitler-web/`
 
 ## Features
 
